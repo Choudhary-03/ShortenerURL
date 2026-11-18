@@ -21,20 +21,7 @@ class CodeGenerationError(APIException):
     default_code = "code_generation_failed"
 
 
-def create_short_url(*, owner, original_url: str, custom_alias: str | None = None,
-                     expires_at=None) -> ShortURL:
-    if custom_alias:
-        if ShortURL.objects.filter(short_code=custom_alias).exists():
-            raise ValidationError({"custom_alias": "This alias is already taken."})
-        try:
-            with transaction.atomic():
-                return ShortURL.objects.create(
-                    owner=owner, short_code=custom_alias,
-                    original_url=original_url, expires_at=expires_at,
-                )
-        except IntegrityError:  # lost a race with another request
-            raise ValidationError({"custom_alias": "This alias is already taken."})
-
+def create_short_url(*, owner, original_url: str, expires_at=None) -> ShortURL:
     for _ in range(MAX_CODE_ATTEMPTS):
         code = generate_code()
         if code.lower() in RESERVED_CODES:

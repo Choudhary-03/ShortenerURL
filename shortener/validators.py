@@ -1,5 +1,4 @@
 import ipaddress
-import re
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -9,7 +8,6 @@ from django.utils import timezone
 ALLOWED_SCHEMES = {"http", "https"}
 MAX_URL_LENGTH = 2048
 
-ALIAS_PATTERN = re.compile(r"^[A-Za-z0-9_-]{3,32}$")
 RESERVED_CODES = {
     "admin", "api", "static", "media", "health", "metrics",
     "docs", "login", "logout", "register", "favicon.ico", "robots.txt",
@@ -42,15 +40,6 @@ def validate_original_url(value: str) -> None:
     own_host = (urlparse(settings.BASE_SHORT_URL).hostname or "").lower()
     if own_host and host == own_host:
         raise ValidationError("Cannot shorten a link that points to this service.")
-
-
-def validate_alias(value: str) -> None:
-    if not ALIAS_PATTERN.match(value):
-        raise ValidationError(
-            "Alias must be 3-32 characters: letters, numbers, hyphens, or underscores."
-        )
-    if value.lower() in RESERVED_CODES:
-        raise ValidationError("This alias is reserved.")
 
 
 def validate_future_datetime(value) -> None:
