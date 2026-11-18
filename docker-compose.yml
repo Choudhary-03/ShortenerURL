@@ -22,7 +22,7 @@ x-app-env: &app-env
   CELERY_EAGER: "False"
 
 x-app-build: &app-build
-  context: ..
+  context: .
   dockerfile: deployment/Dockerfile
 
 services:
