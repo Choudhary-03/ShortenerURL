@@ -26,9 +26,8 @@ class ClickSummaryView(APIView):
     def get(self, request, pk):
         short_url = selectors.get_owned_short_url(owner=request.user, pk=pk)
         params = _params(request)
-        return Response(
-            selectors.get_summary(short_url=short_url, start=params["start"], end=params["end"])
-        )
+        data = selectors.get_summary(short_url=short_url, start=params["start"], end=params["end"])
+        return Response(ClickSummarySerializer(data).data)
 
 
 class ClickTimeseriesView(APIView):
@@ -39,11 +38,10 @@ class ClickTimeseriesView(APIView):
     def get(self, request, pk):
         short_url = selectors.get_owned_short_url(owner=request.user, pk=pk)
         params = _params(request)
-        return Response(
-            selectors.get_timeseries(
-                short_url=short_url,
-                start=params["start"],
-                end=params["end"],
-                interval=params["interval"],
-            )
+        data = selectors.get_timeseries(
+            short_url=short_url,
+            start=params["start"],
+            end=params["end"],
+            interval=params["interval"],
         )
+        return Response(ClickTimeseriesSerializer(data).data)

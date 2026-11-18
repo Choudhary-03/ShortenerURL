@@ -3,20 +3,22 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework import serializers
 
+from config.fields import ISTDateTimeField
+
 DEFAULT_RANGE = timedelta(days=30)
 MAX_RANGE = timedelta(days=366)
 MAX_HOURLY_RANGE = timedelta(days=7)
 
 
 class AnalyticsQuerySerializer(serializers.Serializer):
-    """Query params: start, end (ISO 8601), interval (hour | day | week)."""
+    """Query params: start, end (IST AM/PM or ISO 8601), interval (hour | day | week)."""
 
-    start = serializers.DateTimeField(required=False)
-    end = serializers.DateTimeField(required=False)
+    start = ISTDateTimeField(required=False)
+    end = ISTDateTimeField(required=False)
     interval = serializers.ChoiceField(choices=["hour", "day", "week"], default="day")
 
     def validate(self, attrs):
-        end = attrs.get("end") or timezone.now()
+        end = attrs.get("end") or timezone.localtime(timezone.now())
         start = attrs.get("start") or end - DEFAULT_RANGE
         interval = attrs["interval"]
 
@@ -53,8 +55,8 @@ class ReferrerCountSerializer(CountSerializer):
 
 
 class PeriodSerializer(serializers.Serializer):
-    start = serializers.DateTimeField()
-    end = serializers.DateTimeField()
+    start = ISTDateTimeField()
+    end = ISTDateTimeField()
 
 
 class ClickSummarySerializer(serializers.Serializer):
@@ -69,7 +71,7 @@ class ClickSummarySerializer(serializers.Serializer):
 
 
 class TimeseriesPointSerializer(serializers.Serializer):
-    timestamp = serializers.DateTimeField()
+    timestamp = ISTDateTimeField()
     clicks = serializers.IntegerField()
 
 

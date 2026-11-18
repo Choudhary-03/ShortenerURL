@@ -87,7 +87,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ---------------------------------------------------------------- i18n / static
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
@@ -104,6 +104,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DATETIME_FORMAT": "%Y-%m-%d %I:%M:%S %p",
+    "DATETIME_INPUT_FORMATS": [
+        "%Y-%m-%d %I:%M:%S %p",
+        "%Y-%m-%d %I:%M %p",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%d-%m-%Y %I:%M:%S %p",
+        "%d-%m-%Y %I:%M %p",
+        "%d/%m/%Y %I:%M:%S %p",
+        "%d/%m/%Y %I:%M %p",
+        "iso-8601",
+    ],
 }
 
 SIMPLE_JWT = {

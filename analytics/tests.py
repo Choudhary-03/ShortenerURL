@@ -179,7 +179,7 @@ class ServiceTests(TestCase):
 class SelectorTests(TestCase):
     def setUp(self):
         self.short_url = make_url(make_user())
-        self.base = datetime(2026, 10, 10, 12, 0, tzinfo=dt_timezone.utc)
+        self.base = datetime(2026, 10, 10, 12, 0, tzinfo=timezone.get_current_timezone())
 
     def test_summary_counts_and_breakdowns(self):
         make_click(self.short_url, self.base, country="IN", referrer_domain="google.com")
@@ -242,14 +242,15 @@ class SelectorTests(TestCase):
         self.assertEqual([p["clicks"] for p in result["data"]], [0, 2, 0, 1, 0])
 
     def test_timeseries_weekly_buckets_start_on_monday(self):
-        make_click(self.short_url, datetime(2026, 10, 10, 9, 0, tzinfo=dt_timezone.utc))
-        make_click(self.short_url, datetime(2026, 10, 14, 9, 0, tzinfo=dt_timezone.utc))
-        make_click(self.short_url, datetime(2026, 10, 14, 15, 0, tzinfo=dt_timezone.utc))
+        tz = timezone.get_current_timezone()
+        make_click(self.short_url, datetime(2026, 10, 10, 9, 0, tzinfo=tz))
+        make_click(self.short_url, datetime(2026, 10, 14, 9, 0, tzinfo=tz))
+        make_click(self.short_url, datetime(2026, 10, 14, 15, 0, tzinfo=tz))
 
         result = selectors.get_timeseries(
             short_url=self.short_url,
-            start=datetime(2026, 10, 10, 0, 0, tzinfo=dt_timezone.utc),
-            end=datetime(2026, 10, 20, 0, 0, tzinfo=dt_timezone.utc),
+            start=datetime(2026, 10, 10, 0, 0, tzinfo=tz),
+            end=datetime(2026, 10, 20, 0, 0, tzinfo=tz),
             interval="week",
         )
         self.assertEqual(result["data"][0]["timestamp"].weekday(), 0)
@@ -321,6 +322,24 @@ class AnalyticsAPITests(TestCase):
         self.client.force_authenticate(self.owner)
         response = self.client.get(self.series_url, {"interval": "hour"})  # default range is 30 days
         self.assertEqual(response.status_code, 400)
+
+    def test_analytics_summary_datetime_am_pm_format(self):
+        self.client.force_authenticate(self.owner)
+        response = self.client.get(self.summary_url)
+        self.assertEqual(response.status_code, 200)
+        am_pm_pattern = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (AM|PM)$"
+        self.assertRegex(response.data["period"]["start"], am_pm_pattern)
+        self.assertRegex(response.data["period"]["end"], am_pm_pattern)
+
+    def test_analytics_timeseries_datetime_am_pm_format(self):
+        self.client.force_authenticate(self.owner)
+        response = self.client.get(self.series_url)
+        self.assertEqual(response.status_code, 200)
+        am_pm_pattern = r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (AM|PM)$"
+        self.assertRegex(response.data["period"]["start"], am_pm_pattern)
+        self.assertRegex(response.data["period"]["end"], am_pm_pattern)
+        for point in response.data["data"]:
+            self.assertRegex(point["timestamp"], am_pm_pattern)
 
 
 class RedirectIntegrationTests(TestCase):

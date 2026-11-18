@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from config.fields import ISTDateTimeField
+
 from .models import ShortURL
 from .utils import build_short_url
 from .validators import validate_alias, validate_future_datetime, validate_original_url
@@ -7,6 +9,9 @@ from .validators import validate_alias, validate_future_datetime, validate_origi
 
 class ShortURLSerializer(serializers.ModelSerializer):
     short_url = serializers.SerializerMethodField()
+    expires_at = ISTDateTimeField(required=False, allow_null=True)
+    created_at = ISTDateTimeField(read_only=True)
+    updated_at = ISTDateTimeField(read_only=True)
 
     class Meta:
         model = ShortURL
@@ -25,7 +30,7 @@ class CreateShortURLSerializer(serializers.Serializer):
     custom_alias = serializers.CharField(
         required=False, allow_null=True, allow_blank=True, validators=[validate_alias]
     )
-    expires_at = serializers.DateTimeField(
+    expires_at = ISTDateTimeField(
         required=False, allow_null=True, validators=[validate_future_datetime]
     )
 
@@ -38,6 +43,6 @@ class UpdateShortURLSerializer(serializers.Serializer):
         max_length=2048, required=False, validators=[validate_original_url]
     )
     is_active = serializers.BooleanField(required=False)
-    expires_at = serializers.DateTimeField(
+    expires_at = ISTDateTimeField(
         required=False, allow_null=True, validators=[validate_future_datetime]
     )

@@ -33,4 +33,5 @@ class Click(models.Model):
         ]
 
     def __str__(self):
-        return f"Click on {self.short_url_id} at {self.clicked_at:%Y-%m-%d %H:%M:%S}"
+        local_time = timezone.localtime(self.clicked_at)
+        return f"Click on {self.short_url_id} at {local_time:%Y-%m-%d %I:%M:%S %p}"

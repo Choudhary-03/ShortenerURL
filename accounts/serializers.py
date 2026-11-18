@@ -2,11 +2,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from config.fields import ISTDateTimeField
+
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     """Output/profile serializer. Never exposes the password hash."""
+
+    date_joined = ISTDateTimeField(read_only=True)
 
     class Meta:
         model = User
