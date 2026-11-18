@@ -1,0 +1,6 @@
+# DOMAIN comes from .env. Use a real domain for a Let's Encrypt certificate,
+# or "localhost" to test HTTPS locally with a self-signed certificate.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:8000
+}
